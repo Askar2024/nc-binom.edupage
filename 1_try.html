@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mi Bomba — Sudden Video Pop</title>
+<style>
+  :root{--btn-size:20px}
+  html,body{height:100%;margin:0;font-family:system-ui,Arial;background:#b7ff7e}
+  .wrap{max-width:900px;margin:48px auto;padding:20px;text-align:center}
+  img.hero{width:100%;max-height:480px;object-fit:cover;border-radius:24px;display:block;margin:0 auto}
+  h1{margin:.6rem 0}
+  p{margin:.2rem 0 1rem;color:#222}
+  #playBtn{
+    padding:16px 28px;font-size:28px;border-radius:40px;background:#d32f2f;color:#fff;border:0;cursor:pointer;
+  }
+
+  /* video starts tiny/invisible */
+  #scareVideo{
+    position:fixed;
+    top:50%;left:50%;
+    width:8px;height:8px;
+    transform:translate(-50%,-50%);
+    opacity:0;
+    z-index:9999;
+    background:#000;
+    display:block;
+    object-fit:cover;
+  }
+
+  /* when active -> fill viewport instantly (no smooth transition) */
+  #scareVideo.active{
+    top:0;left:0;
+    width:100vw;height:100vh;
+    transform:none;
+    opacity:1;
+  }
+
+  /* hide overflow so it looks full */
+  body.no-scroll{overflow:hidden}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="hero" src="1.png" alt="Mi Bomba portrait">
+    <h1>This is MI BOMBA</h1>
+    <p>He is young and talented, but has a scarred look from a face-hugger encounter.</p>
+
+    <!-- BUTTON: user must click -->
+    <button id="playBtn">Subscribe to him!!</button>
+  </div>
+
+  <!-- Video element with sources; replace URL(s) if needed.
+       Default uses the GitHub Pages mp4 you mentioned earlier. -->
+  <video id="scareVideo" playsinline webkit-playsinline preload="auto" muted>
+    <!-- Primary: direct GitHub Pages mp4 (replace if necessary) -->
+    <source src="https://campuchiavd.github.io/vdff.mp4" type="video/mp4">
+    <!-- Fallback local file name if you host locally: vdff.mp4 -->
+    <source src="vdff.mp4" type="video/mp4">
+    <!-- Accessible fallback text -->
+    Your browser does not support the video tag.
+  </video>
+
+<script>
+(function(){
+  const btn = document.getElementById('playBtn');
+  const vid = document.getElementById('scareVideo');
+
+  // Quick debug helper: prints network/load errors in console
+  vid.addEventListener('error', (e) => console.log('Video error event:', e));
+  vid.addEventListener('stalled', () => console.log('Video stalled'));
+  vid.addEventListener('suspend', () => console.log('Video suspended'));
+
+  btn.addEventListener('click', async () => {
+    // Instantly make the page "full" and remove scrolling
+    document.body.classList.add('no-scroll');
+
+    // Show video instantly (no animation)
+    vid.classList.add('active');
+
+    // Try to unmute and set volume to max AFTER a user gesture
+    try {
+      vid.muted = false;
+      vid.volume = 1.0;
+    } catch(e){ console.log('Volume set blocked:', e); }
+
+    // Attempt to play - allowed because we're inside a click handler
+    try {
+      await vid.play();
+      console.log('Playback started');
+    } catch (err) {
+      console.log('Play failed (browser policy):', err);
+      // Fallback: unmute later if user taps the video
+      vid.muted = true;
+      alert('Tap the video to enable sound if it did not start automatically.');
+    }
+
+    // Remove the button so it doesn't show above the video
+    btn.style.display = 'none';
+
+    // Optional: clicking the video will pause/close it (lets user exit)
+    vid.onclick = () => {
+      vid.pause();
+      vid.classList.remove('active');
+      document.body.classList.remove('no-scroll');
+      btn.style.display = 'inline-block';
+    };
+  });
+})();
+</script>
+</body>
+</html>
